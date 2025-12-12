@@ -594,6 +594,14 @@ async def process_topup_amount(
             from .heleket import process_heleket_payment_amount
             async with AsyncSessionLocal() as db:
                 await process_heleket_payment_amount(message, db_user, db, amount_kopeks, state)
+        elif payment_method == "tochka":
+            from app.database.database import AsyncSessionLocal
+            from .tochka import process_tochka_payment_amount
+
+            async with AsyncSessionLocal() as db:
+                await process_tochka_payment_amount(
+                    message, db_user, db, amount_kopeks, state
+                )
         else:
             await message.answer("Неизвестный способ оплаты")
         
@@ -963,6 +971,12 @@ def register_balance_handlers(dp: Dispatcher):
     dp.callback_query.register(
         check_heleket_payment_status,
         F.data.startswith("check_heleket_")
+    )
+
+    from .tochka import start_tochka_payment
+    dp.callback_query.register(
+        start_tochka_payment,
+        F.data == "topup_tochka",
     )
 
     from .mulenpay import check_mulenpay_payment_status

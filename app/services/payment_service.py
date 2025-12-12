@@ -13,6 +13,7 @@ from app.utils.currency_converter import currency_converter  # noqa: F401
 from app.external.cryptobot import CryptoBotService
 from app.external.heleket import HeleketService
 from app.external.telegram_stars import TelegramStarsService
+from app.external.tochka import TochkaClient
 from app.services.mulenpay_service import MulenPayService
 from app.services.pal24_service import Pal24Service
 from app.services.platega_service import PlategaService
@@ -23,6 +24,7 @@ from app.services.payment import (
     Pal24PaymentMixin,
     PlategaPaymentMixin,
     PaymentCommonMixin,
+    TochkaPaymentMixin,
     TelegramStarsMixin,
     TributePaymentMixin,
     YooKassaPaymentMixin,
@@ -217,6 +219,31 @@ async def link_platega_payment_to_transaction(*args, **kwargs):
     return await platega_crud.link_platega_payment_to_transaction(*args, **kwargs)
 
 
+async def create_tochka_payment(*args, **kwargs):
+    tochka_crud = import_module("app.database.crud.tochka")
+    return await tochka_crud.create_tochka_payment(*args, **kwargs)
+
+
+async def get_tochka_payment_by_payment_id(*args, **kwargs):
+    tochka_crud = import_module("app.database.crud.tochka")
+    return await tochka_crud.get_tochka_payment_by_payment_id(*args, **kwargs)
+
+
+async def get_tochka_payment_by_id(*args, **kwargs):
+    tochka_crud = import_module("app.database.crud.tochka")
+    return await tochka_crud.get_tochka_payment_by_id(*args, **kwargs)
+
+
+async def update_tochka_payment(*args, **kwargs):
+    tochka_crud = import_module("app.database.crud.tochka")
+    return await tochka_crud.update_tochka_payment(*args, **kwargs)
+
+
+async def link_tochka_payment_to_transaction(*args, **kwargs):
+    tochka_crud = import_module("app.database.crud.tochka")
+    return await tochka_crud.link_tochka_payment_to_transaction(*args, **kwargs)
+
+
 async def create_cryptobot_payment(*args, **kwargs):
     crypto_crud = import_module("app.database.crud.cryptobot")
     return await crypto_crud.create_cryptobot_payment(*args, **kwargs)
@@ -272,6 +299,7 @@ class PaymentService(
     MulenPayPaymentMixin,
     Pal24PaymentMixin,
     PlategaPaymentMixin,
+    TochkaPaymentMixin,
     WataPaymentMixin,
 ):
     """Основной интерфейс платежей, делегирующий работу специализированным mixin-ам."""
@@ -300,10 +328,11 @@ class PaymentService(
             PlategaService() if settings.is_platega_enabled() else None
         )
         self.wata_service = WataService() if settings.is_wata_enabled() else None
+        self.tochka_client = TochkaClient() if settings.is_tochka_enabled() else None
 
         mulenpay_name = settings.get_mulenpay_display_name()
         logger.debug(
-            "PaymentService инициализирован (YooKassa=%s, Stars=%s, CryptoBot=%s, Heleket=%s, %s=%s, Pal24=%s, Platega=%s, Wata=%s)",
+            "PaymentService инициализирован (YooKassa=%s, Stars=%s, CryptoBot=%s, Heleket=%s, %s=%s, Pal24=%s, Platega=%s, Wata=%s, Tochka=%s)",
             bool(self.yookassa_service),
             bool(self.stars_service),
             bool(self.cryptobot_service),
@@ -313,4 +342,5 @@ class PaymentService(
             bool(self.pal24_service),
             bool(self.platega_service),
             bool(self.wata_service),
+            bool(self.tochka_client),
         )

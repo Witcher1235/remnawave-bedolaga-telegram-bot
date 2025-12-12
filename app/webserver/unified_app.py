@@ -98,15 +98,16 @@ def create_unified_app(
     payments_router = payments.create_payment_router(bot, payment_service)
     if payments_router:
         app.include_router(payments_router)
-    payment_providers_state = {
-        "tribute": settings.TRIBUTE_ENABLED,
-        "mulenpay": settings.is_mulenpay_enabled(),
-        "cryptobot": settings.is_cryptobot_enabled(),
-        "yookassa": settings.is_yookassa_enabled(),
-        "pal24": settings.is_pal24_enabled(),
-        "wata": settings.is_wata_enabled(),
-        "heleket": settings.is_heleket_enabled(),
-    }
+        payment_providers_state = {
+            "tribute": settings.TRIBUTE_ENABLED,
+            "mulenpay": settings.is_mulenpay_enabled(),
+            "cryptobot": settings.is_cryptobot_enabled(),
+            "yookassa": settings.is_yookassa_enabled(),
+            "pal24": settings.is_pal24_enabled(),
+            "wata": settings.is_wata_enabled(),
+            "heleket": settings.is_heleket_enabled(),
+            "tochka": settings.is_tochka_enabled(),
+        }
 
     if enable_telegram_webhook:
         telegram_processor = telegram.TelegramWebhookProcessor(

@@ -13,6 +13,7 @@ from .heleket import HeleketPaymentMixin
 from .mulenpay import MulenPayPaymentMixin
 from .pal24 import Pal24PaymentMixin
 from .platega import PlategaPaymentMixin
+from .tochka import TochkaPaymentMixin
 from .wata import WataPaymentMixin
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     "MulenPayPaymentMixin",
     "Pal24PaymentMixin",
     "PlategaPaymentMixin",
+    "TochkaPaymentMixin",
     "WataPaymentMixin",
 ]

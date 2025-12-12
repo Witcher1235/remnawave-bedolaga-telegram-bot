@@ -33,7 +33,7 @@ def _create_cors_response() -> Response:
         headers={
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, trbt-signature, Crypto-Pay-API-Signature, X-MulenPay-Signature, Authorization",
+            "Access-Control-Allow-Headers": "Content-Type, trbt-signature, Crypto-Pay-API-Signature, X-MulenPay-Signature, X-Tochka-Signature, Authorization",
         },
     )
 
@@ -536,6 +536,36 @@ def create_payment_router(bot: Bot, payment_service: PaymentService) -> APIRoute
                 {"status": "error", "reason": "not_processed"},
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
+
+        routes_registered = True
+
+    if settings.is_tochka_enabled():
+
+        @router.options(settings.TOCHKA_WEBHOOK_PATH)
+        async def tochka_options() -> Response:
+            return _create_cors_response()
+
+        @router.post(settings.TOCHKA_WEBHOOK_PATH)
+        async def tochka_webhook(request: Request) -> JSONResponse:
+            raw_body = await request.body()
+            signature = request.headers.get("X-Tochka-Signature")
+
+            client = getattr(payment_service, "tochka_client", None)
+            if not client or not client.verify_webhook_signature(raw_body, signature):
+                return JSONResponse(
+                    {"status": "error", "reason": "invalid_signature"},
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                payload = await request.json()
+            except Exception:
+                payload = {}
+
+            ok = await _process_payment_service_callback(
+                payment_service, payload, "process_tochka_webhook"
+            )
+            return JSONResponse({"status": "ok" if ok else "error"})
 
         routes_registered = True
 

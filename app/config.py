@@ -292,6 +292,15 @@ class Settings(BaseSettings):
     PLATEGA_WEBHOOK_PATH: str = "/platega-webhook"
     PLATEGA_WEBHOOK_HOST: str = "0.0.0.0"
     PLATEGA_WEBHOOK_PORT: int = 8086
+    TOCHKA_ENABLED: bool = False
+    TOCHKA_API_TOKEN: Optional[str] = None
+    TOCHKA_WEBHOOK_SECRET: Optional[str] = None
+    TOCHKA_BASE_URL: str = "https://enter.tochka.com/api"
+    TOCHKA_CURRENCY: str = "RUB"
+    TOCHKA_RETURN_URL: Optional[str] = None
+    TOCHKA_WEBHOOK_PATH: str = "/tochka-webhook"
+    TOCHKA_WEBHOOK_HOST: str = "0.0.0.0"
+    TOCHKA_WEBHOOK_PORT: int = 8088
 
     WATA_ENABLED: bool = False
     WATA_BASE_URL: str = "https://api.wata.pro/api/h2h"
@@ -1088,6 +1097,17 @@ class Settings(BaseSettings):
             12: {"name": "Международные карты", "title": "🌍 Международные карты"},
             13: {"name": "Криптовалюта", "title": "🪙 Криптовалюта"},
         }
+
+    def is_tochka_enabled(self) -> bool:
+        return bool(self.TOCHKA_ENABLED and self.TOCHKA_API_TOKEN)
+
+    def get_tochka_return_url(self) -> Optional[str]:
+        if self.TOCHKA_RETURN_URL:
+            return self.TOCHKA_RETURN_URL
+
+        if self.WEBHOOK_URL:
+            return f"{self.WEBHOOK_URL}/payment-success"
+        return None
 
     def get_platega_method_display_name(self, method_code: int) -> str:
         definitions = self.get_platega_method_definitions()

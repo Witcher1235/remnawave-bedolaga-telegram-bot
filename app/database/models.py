@@ -83,6 +83,7 @@ class PaymentMethod(Enum):
     PAL24 = "pal24"
     WATA = "wata"
     PLATEGA = "platega"
+    TOCHKA = "tochka"
     MANUAL = "manual"
 
 
@@ -461,6 +462,48 @@ class PlategaPayment(Base):
                 self.amount_rubles,
                 self.status,
                 self.payment_method_code,
+            )
+        )
+
+
+class TochkaPayment(Base):
+    __tablename__ = "tochka_payments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    payment_id = Column(String(128), unique=True, nullable=False, index=True)
+    amount_kopeks = Column(Integer, nullable=False)
+    currency = Column(String(10), nullable=False, default="RUB")
+    description = Column(Text, nullable=True)
+
+    status = Column(String(50), nullable=False, default="pending")
+    is_paid = Column(Boolean, nullable=False, default=False)
+    paid_at = Column(DateTime, nullable=True)
+
+    checkout_url = Column(Text, nullable=True)
+    metadata_json = Column(JSON, nullable=True)
+    callback_payload = Column(JSON, nullable=True)
+
+    transaction_id = Column(Integer, ForeignKey("transactions.id"), nullable=True)
+
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    user = relationship("User", backref="tochka_payments")
+    transaction = relationship("Transaction", backref="tochka_payment")
+
+    @property
+    def amount_rubles(self) -> float:
+        return self.amount_kopeks / 100
+
+    def __repr__(self) -> str:  # pragma: no cover - debug helper
+        return (
+            "<TochkaPayment(id={0}, payment_id={1}, amount={2}₽, status={3})>".format(
+                self.id,
+                self.payment_id,
+                self.amount_rubles,
+                self.status,
             )
         )
 

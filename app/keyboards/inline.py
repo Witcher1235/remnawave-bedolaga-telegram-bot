@@ -1232,6 +1232,15 @@ def get_payment_methods_keyboard(amount_kopeks: int, language: str = DEFAULT_LAN
         ])
         has_direct_payment_methods = True
 
+    if settings.is_tochka_enabled():
+        keyboard.append([
+            InlineKeyboardButton(
+                text=texts.t("PAYMENT_TOCHKA", "🏦 Точка"),
+                callback_data=_build_callback("tochka"),
+            )
+        ])
+        has_direct_payment_methods = True
+
     if settings.is_cryptobot_enabled():
         keyboard.append([
             InlineKeyboardButton(
